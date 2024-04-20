@@ -51,6 +51,17 @@ People *love* thorough bug reports. I'm not even kidding.
 * Make sure to run `go vet` to check for issues that the compiler does not catch
 * Test your code as you go.
 
+## Contributing Guidelines
+
+### Configuration File Policy
+
+- The `config.yaml` file in the repository is a template for development purposes. It contains non-sensitive, generic default values.
+- **Do Not Commit Changes to `config.yaml`**: If you need to update this file (e.g., to add new configuration parameters), you must discuss the changes with the project maintainers and obtain approval before committing these changes.
+- **Local Changes**: Developers should configure their local development environments without altering the tracked `config.yaml` file. Use the command `git update-index --assume-unchanged config.yaml` to ignore local changes to this file.
+- **Commit Hooks**: This repository uses pre-commit hooks to prevent accidental changes to `config.yaml`. If you believe your changes are necessary, refer to the discussion and approval process outlined above.
+
+Please adhere to these guidelines to maintain the integrity and security of the project configuration.
+
 ## License
 
 By contributing, you agree that your contributions will be licensed under its MIT License.

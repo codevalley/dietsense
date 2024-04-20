@@ -21,3 +21,6 @@ Gopkg.lock
 
 # VSCode
 .vscode/
+
+#config file
+config.yaml
