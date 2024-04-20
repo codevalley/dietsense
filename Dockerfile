@@ -1,5 +1,5 @@
 # Use the official Go image as a base image for the build stage
-FROM golang:latest AS builder
+FROM golang:1.21 AS builder
 
 WORKDIR /app
 
@@ -17,9 +17,13 @@ WORKDIR /app/cmd
 RUN go build -o ../main .
 
 # Start a new stage from scratch
-FROM debian:latest
+FROM debian:bookworm-slim
 
 WORKDIR /app
+
+# Use non-root user
+RUN useradd -m dietuser
+USER dietuser
 
 # Copy the pre-built binary file from the previous stage
 COPY --from=builder /app/main .
