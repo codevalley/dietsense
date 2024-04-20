@@ -82,7 +82,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 ## Authors
 
-* **Your Name** - *Initial work* - [Narayan Babu](https://github.com/codevalley)
+* **Narayan Babu** - *Initial work* - [@codevalley](https://github.com/codevalley)
 
 ## License
 
