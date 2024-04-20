@@ -28,4 +28,8 @@ USER dietuser
 # Copy the pre-built binary file from the previous stage
 COPY --from=builder /app/main .
 
+# Ensure the configuration file is included
+# Assuming your configuration file is named config.yaml and located in the root of your project
+COPY --from=builder /app/config.yaml ./config.yaml
+
 ENTRYPOINT ["/app/main"]
