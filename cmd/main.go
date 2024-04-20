@@ -3,8 +3,11 @@ package main
 import (
 	"context"
 	"dietsense/internal/api"
+	"dietsense/internal/services"
 	"dietsense/pkg/config"
 	"dietsense/pkg/logging"
+	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,6 +17,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func setupFoodAnalysisService() services.FoodAnalysisService {
+	switch config.Config.ServiceType {
+
+	case "openai":
+		return services.NewOpenAIService("your-openai-api-key")
+	case "mock":
+		return services.NewMockImageAnalysisService()
+	default:
+		log.Fatalf("Unknown service type: %s", config.Config.ServiceType)
+		return nil
+	}
+}
 func main() {
 	// Set up configuration
 	config.Setup()
@@ -22,20 +37,24 @@ func main() {
 	logging.Setup()
 	logger := logging.Log // Use the global logger instance from logging package
 
+	logger.Info(fmt.Sprintf("Config: %+v", config.Config))
+	// Choose the service implementation based on configuration or other logic
+	foodService := setupFoodAnalysisService()
+
 	// Set up the Gin router with logging middleware
 	router := gin.New()                   // Creates a router without any middleware by default
 	router.Use(gin.Recovery())            // Adds built-in recovery middleware
 	router.Use(logging.GinLogger(logger)) // Use custom Logrus-based logger middleware
 
 	// Set up API routes
-	api.SetupRoutes(router)
+	api.SetupRoutes(router, foodService)
 
 	// Create the HTTP server
 	server := &http.Server{
 		Addr:    config.Config.ServerAddress, // Use server address from config
 		Handler: router,
 	}
-
+	logger.Info("Server Address:" + config.Config.ServerAddress)
 	// Start server in a goroutine
 	go func() {
 		logger.Infof("Starting server on %s", config.Config.ServerAddress)

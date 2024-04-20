@@ -7,10 +7,13 @@ import (
 )
 
 // AppConfig holds all the configuration for the application
+// AppConfig holds all the configuration for the application
 type AppConfig struct {
-	ServerAddress string
-	Environment   string
-	DatabaseURL   string
+	ServerAddress string `mapstructure:"server_address"`
+	Environment   string `mapstructure:"environment"`
+	DatabaseURL   string `mapstructure:"database_url"`
+	ApiKey        string `mapstructure:"api_key"`
+	ServiceType   string `mapstructure:"service_type"` // "mock" or "openai"
 }
 
 // Config is the exported configuration object
@@ -21,11 +24,13 @@ func Setup() {
 	viper.SetConfigName("config") // Name of config file (without extension)
 	viper.SetConfigType("yaml")   // Type of the config file
 	viper.AddConfigPath("/app")   // Path to look for the config file in
+	viper.AddConfigPath(".")      // Also look for config in the current directory
 	viper.AutomaticEnv()          // Read in environment variables that match
 
 	// Set defaults
 	viper.SetDefault("server_address", ":8080")
 	viper.SetDefault("environment", "development")
+	viper.SetDefault("service_type", "mock") // Default to mock service
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file, %s", err)
