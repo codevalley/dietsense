@@ -196,9 +196,12 @@ func normalizeJSON(content string) string {
 	re := regexp.MustCompile(`(?s)^(?:\x60{3}json\n|\x60{3}\n)?(.*?)(?:\n\x60{3})?$`)
 	normalizedContent := strings.TrimSpace(re.ReplaceAllString(content, "$1"))
 
-	// Remove any trailing newline characters after the JSON object
-	re = regexp.MustCompile(`(}\s*)\n+$`)
-	normalizedContent = re.ReplaceAllString(normalizedContent, "$1")
+	// Unescape escaped characters
+	normalizedContent = strings.ReplaceAll(normalizedContent, "\\\"", "\"")
+	normalizedContent = strings.ReplaceAll(normalizedContent, "\\n", "\n")
+
+	// Remove trailing backticks after the top-level JSON value
+	normalizedContent = strings.TrimRight(normalizedContent, "`")
 
 	return normalizedContent
 }
