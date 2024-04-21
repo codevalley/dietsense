@@ -6,7 +6,6 @@ import (
 	"dietsense/internal/services"
 	"dietsense/pkg/config"
 	"dietsense/pkg/logging"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -37,7 +36,6 @@ func main() {
 	logging.Setup()
 	logger := logging.Log // Use the global logger instance from logging package
 
-	logger.Info(fmt.Sprintf("Config: %+v", config.Config))
 	// Choose the service implementation based on configuration or other logic
 	foodService := setupFoodAnalysisService()
 

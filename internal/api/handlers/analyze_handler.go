@@ -3,6 +3,7 @@ package handlers
 import (
 	"dietsense/internal/services"
 	"dietsense/pkg/config"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -25,7 +26,8 @@ func AnalyzeFood(service services.FoodAnalysisService) gin.HandlerFunc {
 		}
 		defer file.Close()
 
-		context := config.Config.ContextString
+		context := fmt.Sprintf("Here is some info about the picture:*%s*\n%s", c.PostForm("context"), config.Config.ContextString)
+
 		// Calling the service to process the image
 		result, err := service.AnalyzeFood(file, context)
 		if err != nil {
