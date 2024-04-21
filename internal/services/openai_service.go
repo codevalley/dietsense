@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"regexp"
 	"strings"
 )
 
@@ -123,16 +122,33 @@ func parseResponse(response map[string]interface{}) (map[string]interface{}, err
 	content := response["choices"].([]interface{})[0].(map[string]interface{})["message"].(map[string]interface{})["content"].(string)
 	normalizedContent := normalizeJSON(content)
 
+	if normalizedContent == "" {
+		return nil, fmt.Errorf("failed to extract valid JSON content")
+	}
+
 	var data map[string]interface{}
 	if err := json.Unmarshal([]byte(normalizedContent), &data); err != nil {
 		return nil, fmt.Errorf("failed to parse embedded JSON: %w", err)
 	}
 
-	if summary := extractSummary(data); summary != "" {
-		result["summary"] = summary
+	if dietsense, ok := data["dietsense"].([]interface{}); ok && len(dietsense) > 0 {
+		if summary, ok := dietsense[0].(map[string]interface{})["summary"].(string); ok {
+			result["summary"] = summary
+		}
 	}
 
-	if nutritionDetails := extractNutritionDetails(data); len(nutritionDetails) > 0 {
+	if nutrition, ok := data["nutrition"].([]interface{}); ok {
+		nutritionDetails := make([]map[string]interface{}, len(nutrition))
+		for i, item := range nutrition {
+			if detail, ok := item.(map[string]interface{}); ok {
+				nutritionDetails[i] = map[string]interface{}{
+					"component":  detail["component"],
+					"value":      detail["value"],
+					"unit":       detail["unit"],
+					"confidence": detail["confidence"],
+				}
+			}
+		}
 		result["nutrition"] = nutritionDetails
 	}
 
@@ -149,59 +165,21 @@ func parseResponse(response map[string]interface{}) (map[string]interface{}, err
 	return result, nil
 }
 
-func extractSummary(data map[string]interface{}) string {
-	if dietsense, ok := data["Dietsense"].([]interface{}); ok {
-		for _, item := range dietsense {
-			if summary, ok := item.(map[string]interface{})["Summary"].(string); ok {
-				return summary
-			}
-		}
-	}
-	return ""
-}
-
-func extractNutritionDetails(data map[string]interface{}) map[string]string {
-	nutritionDetails := make(map[string]string)
-
-	if nutrition, ok := data["Nutrition"].([]interface{}); ok {
-		for _, item := range nutrition {
-			if detail, ok := item.(map[string]interface{}); ok {
-				if component, ok := detail["Component"].(string); ok {
-					key := strings.ToLower(component)
-					value := fmt.Sprintf("%v (%v | %v)", detail["Value"], detail["Unit"], detail["Confidence"])
-					nutritionDetails[key] = value
-				}
-			}
-		}
-	} else if dietsense, ok := data["Dietsense"].([]interface{}); ok {
-		for _, item := range dietsense {
-			if nutrition, ok := item.(map[string]interface{})["Nutrition"].([]interface{}); ok {
-				for _, item := range nutrition {
-					if detail, ok := item.(map[string]interface{}); ok {
-						if component, ok := detail["Component"].(string); ok {
-							key := strings.ToLower(component)
-							value := fmt.Sprintf("%v (%v | %v)", detail["Value"], detail["Unit"], detail["Confidence"])
-							nutritionDetails[key] = value
-						}
-					}
-				}
-			}
-		}
-	}
-
-	return nutritionDetails
-}
 func normalizeJSON(content string) string {
-	// Remove code block markers and trim whitespace
-	re := regexp.MustCompile(`(?s)^(?:\x60{3}json\n|\x60{3}\n)?(.*?)(?:\n\x60{3})?$`)
-	normalizedContent := strings.TrimSpace(re.ReplaceAllString(content, "$1"))
+	// Find the start and end of the JSON content
+	startIndex := strings.Index(content, "{")
+	endIndex := strings.LastIndex(content, "}")
 
-	// Unescape escaped characters
-	normalizedContent = strings.ReplaceAll(normalizedContent, "\\\"", "\"")
-	normalizedContent = strings.ReplaceAll(normalizedContent, "\\n", "\n")
+	if startIndex != -1 && endIndex != -1 && endIndex >= startIndex {
+		// Extract the JSON content
+		jsonContent := content[startIndex : endIndex+1]
 
-	// Remove trailing backticks after the top-level JSON value
-	normalizedContent = strings.TrimRight(normalizedContent, "`")
+		// Unescape escaped characters
+		jsonContent = strings.ReplaceAll(jsonContent, "\\\"", "\"")
+		jsonContent = strings.ReplaceAll(jsonContent, "\\n", "\n")
 
-	return normalizedContent
+		return jsonContent
+	}
+
+	return ""
 }
