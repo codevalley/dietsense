@@ -12,8 +12,9 @@ type AppConfig struct {
 	ServerAddress string `mapstructure:"server_address"`
 	Environment   string `mapstructure:"environment"`
 	DatabaseURL   string `mapstructure:"database_url"`
-	ApiKey        string `mapstructure:"api_key"`
+	OpenaiKey     string `mapstructure:"openai_key"`
 	ServiceType   string `mapstructure:"service_type"` // "mock" or "openai"
+	ContextString string `mapstructure:"context_string"`
 }
 
 // Config is the exported configuration object

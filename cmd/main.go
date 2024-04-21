@@ -21,7 +21,7 @@ func setupFoodAnalysisService() services.FoodAnalysisService {
 	switch config.Config.ServiceType {
 
 	case "openai":
-		return services.NewOpenAIService("your-openai-api-key")
+		return services.NewOpenAIService(config.Config.OpenaiKey)
 	case "mock":
 		return services.NewMockImageAnalysisService()
 	default:
