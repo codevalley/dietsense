@@ -12,6 +12,9 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
+# Don't check in image files used for testing
+*.jpg
+
 # Dependency directories (remove the "/" at the end to include the directory itself)
 /vendor/
 Gopkg.lock
