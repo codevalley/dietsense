@@ -2,7 +2,6 @@ package services
 
 import (
 	"bytes"
-	"crypto/tls"
 	"dietsense/pkg/logging"
 	"encoding/base64"
 	"encoding/json"
@@ -92,11 +91,7 @@ func sendHTTPRequest(apiKey string, payload map[string]interface{}) (map[string]
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-	}
+	client := &http.Client{}
 
 	resp, err := client.Do(req)
 	if err != nil {
