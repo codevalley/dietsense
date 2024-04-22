@@ -13,6 +13,7 @@ type AppConfig struct {
 	Environment   string `mapstructure:"environment"`
 	DatabaseURL   string `mapstructure:"database_url"`
 	OpenaiKey     string `mapstructure:"openai_key"`
+	ClaudeKey     string `mapstructure:"claude_key"`
 	ServiceType   string `mapstructure:"service_type"` // "mock" or "openai"
 	ContextString string `mapstructure:"context_string"`
 }

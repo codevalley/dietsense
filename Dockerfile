@@ -21,7 +21,11 @@ FROM debian:bookworm-slim
 
 # Set the working directory
 WORKDIR /app
-
+# Update CA certificates
+RUN apt-get update && \
+    apt-get install -y ca-certificates --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
+    
 # Create a non-root user and switch to it
 RUN useradd -m dietuser && \
     chown dietuser /app

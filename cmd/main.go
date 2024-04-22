@@ -21,6 +21,8 @@ func setupFoodAnalysisService() services.FoodAnalysisService {
 
 	case "openai":
 		return services.NewOpenAIService(config.Config.OpenaiKey)
+	case "claude":
+		return services.NewClaudeService(config.Config.ClaudeKey)
 	case "mock":
 		return services.NewMockImageAnalysisService()
 	default:
