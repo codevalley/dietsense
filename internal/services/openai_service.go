@@ -37,7 +37,7 @@ func (s *OpenAIService) AnalyzeFood(file io.Reader, context string) (map[string]
 		return nil, err
 	}
 
-	return parseResponse(responseData)
+	return parseOpenAIResponse(responseData)
 }
 
 func createPayload(encodedImage, context string) map[string]interface{} {
@@ -64,7 +64,7 @@ func createPayload(encodedImage, context string) map[string]interface{} {
 	}
 }
 
-func parseResponse(response map[string]interface{}) (map[string]interface{}, error) {
+func parseOpenAIResponse(response map[string]interface{}) (map[string]interface{}, error) {
 	result := make(map[string]interface{})
 
 	content := response["choices"].([]interface{})[0].(map[string]interface{})["message"].(map[string]interface{})["content"].(string)

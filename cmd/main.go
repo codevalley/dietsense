@@ -6,7 +6,6 @@ import (
 	"dietsense/internal/services"
 	"dietsense/pkg/config"
 	"dietsense/pkg/logging"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,20 +15,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func setupFoodAnalysisService() services.FoodAnalysisService {
-	switch config.Config.ServiceType {
-
-	case "openai":
-		return services.NewOpenAIService(config.Config.OpenaiKey)
-	case "claude":
-		return services.NewClaudeService(config.Config.ClaudeKey)
-	case "mock":
-		return services.NewMockImageAnalysisService()
-	default:
-		log.Fatalf("Unknown service type: %s", config.Config.ServiceType)
-		return nil
-	}
-}
 func main() {
 	// Set up configuration
 	config.Setup()
@@ -38,8 +23,8 @@ func main() {
 	logging.Setup()
 	logger := logging.Log // Use the global logger instance from logging package
 
-	// Choose the service implementation based on configuration or other logic
-	foodService := setupFoodAnalysisService()
+	// Set up the service factory
+	factory := services.NewServiceFactory(config.Config.ServiceType)
 
 	// Set up the Gin router with logging middleware
 	router := gin.New()                   // Creates a router without any middleware by default
@@ -47,7 +32,7 @@ func main() {
 	router.Use(logging.GinLogger(logger)) // Use custom Logrus-based logger middleware
 
 	// Set up API routes
-	api.SetupRoutes(router, foodService)
+	api.SetupRoutes(router, factory)
 
 	// Create the HTTP server
 	server := &http.Server{
