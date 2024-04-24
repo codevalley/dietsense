@@ -1,14 +1,10 @@
 package services
 
 import (
-	"bytes"
-	"dietsense/pkg/logging"
-	"encoding/base64"
+	"dietsense/pkg/utils"
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
-	"strings"
 )
 
 type OpenAIService struct {
@@ -34,23 +30,14 @@ func NewOpenAIService(apiKey string) *OpenAIService {
 }
 
 func (s *OpenAIService) AnalyzeFood(file io.Reader, context string) (map[string]interface{}, error) {
-	encodedImage := encodeToBase64(file)
+	encodedImage := utils.EncodeToBase64(file)
 	payload := createPayload(encodedImage, context)
-	responseData, err := sendHTTPRequest(s.APIKey, payload)
+	responseData, err := utils.SendHTTPRequest("https://api.openai.com/v1/chat/completions", s.APIKey, payload)
 	if err != nil {
 		return nil, err
 	}
 
 	return parseResponse(responseData)
-}
-
-func encodeToBase64(file io.Reader) string {
-	buf := new(bytes.Buffer)
-	_, err := io.Copy(buf, file)
-	if err != nil {
-		return ""
-	}
-	return base64.StdEncoding.EncodeToString(buf.Bytes())
 }
 
 func createPayload(encodedImage, context string) map[string]interface{} {
@@ -77,45 +64,11 @@ func createPayload(encodedImage, context string) map[string]interface{} {
 	}
 }
 
-func sendHTTPRequest(apiKey string, payload map[string]interface{}) (map[string]interface{}, error) {
-	payloadBytes, err := json.Marshal(payload)
-	if err != nil {
-		return nil, fmt.Errorf("failed to encode request payload: %w", err)
-	}
-
-	req, err := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewReader(payloadBytes))
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+apiKey)
-
-	client := &http.Client{}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to send request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API request failed with status %d", resp.StatusCode)
-	}
-
-	var response map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, fmt.Errorf("failed to decode API response: %w", err)
-	}
-	logging.Log.Info("Response: ", response)
-	return response, nil
-}
-
 func parseResponse(response map[string]interface{}) (map[string]interface{}, error) {
 	result := make(map[string]interface{})
 
 	content := response["choices"].([]interface{})[0].(map[string]interface{})["message"].(map[string]interface{})["content"].(string)
-	normalizedContent := normalizeJSON(content)
+	normalizedContent := utils.NormalizeJSON(content)
 
 	if normalizedContent == "" {
 		return nil, fmt.Errorf("failed to extract valid JSON content")
@@ -158,23 +111,4 @@ func parseResponse(response map[string]interface{}) (map[string]interface{}, err
 	}
 
 	return result, nil
-}
-
-func normalizeJSON(content string) string {
-	// Find the start and end of the JSON content
-	startIndex := strings.Index(content, "{")
-	endIndex := strings.LastIndex(content, "}")
-
-	if startIndex != -1 && endIndex != -1 && endIndex >= startIndex {
-		// Extract the JSON content
-		jsonContent := content[startIndex : endIndex+1]
-
-		// Unescape escaped characters
-		jsonContent = strings.ReplaceAll(jsonContent, "\\\"", "\"")
-		jsonContent = strings.ReplaceAll(jsonContent, "\\n", "\n")
-
-		return jsonContent
-	}
-
-	return ""
 }

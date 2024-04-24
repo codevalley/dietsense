@@ -3,11 +3,11 @@ package services
 import (
 	"context"
 	"dietsense/pkg/logging"
+	"dietsense/pkg/utils"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/liushuangls/go-anthropic/v2"
 )
@@ -64,7 +64,7 @@ func parseClaudeResponse(resp *anthropic.MessagesResponse) (map[string]interface
 
 	content := resp.Content[0].Text
 	logging.Log.Infof("Claude Response: %s ", *content)
-	normalizedContent := normalizeClaudeJSON(*content)
+	normalizedContent := utils.NormalizeJSON(*content)
 
 	if normalizedContent == "" {
 		return nil, fmt.Errorf("failed to extract valid JSON content")
@@ -97,23 +97,4 @@ func parseClaudeResponse(resp *anthropic.MessagesResponse) (map[string]interface
 	}
 
 	return result, nil
-}
-
-func normalizeClaudeJSON(content string) string {
-	// Find the start and end of the JSON content
-	startIndex := strings.Index(content, "{")
-	endIndex := strings.LastIndex(content, "}")
-
-	if startIndex != -1 && endIndex != -1 && endIndex >= startIndex {
-		// Extract the JSON content
-		jsonContent := content[startIndex : endIndex+1]
-
-		// Unescape escaped characters
-		jsonContent = strings.ReplaceAll(jsonContent, "\\\"", "\"")
-		jsonContent = strings.ReplaceAll(jsonContent, "\\n", "\n")
-
-		return jsonContent
-	}
-
-	return ""
 }
