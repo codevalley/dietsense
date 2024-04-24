@@ -19,7 +19,7 @@ func SetupRoutes(router *gin.Engine, factory *services.ServiceFactory) {
 	api := router.Group("/api/v1")
 	{
 		api.POST("/analyze", func(c *gin.Context) {
-			serviceType := c.Query("service_type")
+			serviceType := c.Query("service")
 			if serviceType == "" {
 				serviceType = factory.DefaultService // Use default service type if not specified
 			}

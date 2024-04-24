@@ -23,6 +23,7 @@ func (s *MockImageAnalysisService) AnalyzeFood(file io.Reader, context string) (
 		"carbs":       "50g",
 		"fats":        "10g",
 		"description": "This is a fixed mock response for testing purposes.",
+		"service":     "mock",
 	}
 	return mockResponse, nil
 }

@@ -109,6 +109,6 @@ func parseOpenAIResponse(response map[string]interface{}) (map[string]interface{
 			result["prompt tokens"] = int(promptTokens)
 		}
 	}
-
+	result["service"] = "openAI"
 	return result, nil
 }

@@ -95,6 +95,7 @@ func parseClaudeResponse(resp *anthropic.MessagesResponse) (map[string]interface
 		}
 		result["nutrition"] = nutritionDetails
 	}
+	result["service"] = "claude"
 
 	return result, nil
 }
