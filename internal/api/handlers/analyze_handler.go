@@ -3,6 +3,7 @@ package handlers
 import (
 	"dietsense/internal/services"
 	"dietsense/pkg/config"
+	"dietsense/pkg/logging"
 	"fmt"
 	"net/http"
 
@@ -12,12 +13,19 @@ import (
 // AnalyzeFood creates a handler function that dynamically chooses the food analysis service based on the request.
 func AnalyzeFood(factory *services.ServiceFactory) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Extract 'service_type' from query parameters, fallback to default if not provided
-		serviceType := c.Query("service")
+
+		// Attempt to get `service_type` from POST body
+		serviceType := c.PostForm("service")
+
+		// If not found in post body try from query parameters, fallback to default if not provided
+		if serviceType == "" {
+			serviceType = c.Query("service")
+		}
 		if serviceType == "" {
 			serviceType = factory.DefaultService // Use default service type if not specified
 		}
 
+		logging.Log.Info("Service type: " + serviceType)
 		// Get the service implementation based on the provided or default 'service_type'
 		service, err := factory.GetService(serviceType)
 		if err != nil {
