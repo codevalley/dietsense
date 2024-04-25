@@ -9,9 +9,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// AnalyzeFood creates a handler function that depends on an ImageAnalysisService
-func AnalyzeFood(service services.FoodAnalysisService) gin.HandlerFunc {
+// AnalyzeFood creates a handler function that dynamically chooses the food analysis service based on the request.
+func AnalyzeFood(factory *services.ServiceFactory) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Extract 'service_type' from query parameters, fallback to default if not provided
+		serviceType := c.Query("service")
+		if serviceType == "" {
+			serviceType = factory.DefaultService // Use default service type if not specified
+		}
+
+		// Get the service implementation based on the provided or default 'service_type'
+		service, err := factory.GetService(serviceType)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
 		// Extracting image and context from the form-data
 		fileHeader, err := c.FormFile("image")
 		if err != nil {
