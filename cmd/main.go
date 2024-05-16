@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"dietsense/internal/api"
+	"dietsense/internal/repositories"
 	"dietsense/internal/repositories/postgres"
+	"dietsense/internal/repositories/sqlite"
 	"dietsense/internal/services"
 	"dietsense/pkg/config"
 	"dietsense/pkg/logging"
@@ -24,9 +26,18 @@ func main() {
 	logging.Setup()
 	logger := logging.Log // Use the global logger instance from logging package
 
-	// Initialize the PostgreSQL database
-	dsn := config.Config.DatabaseURL
-	db, err := postgres.NewPostgresDB(dsn)
+	// Initialize the database based on configuration
+	var db repositories.Database
+	var err error
+	if config.Config.DatabaseType == "postgres" {
+		dsn := config.Config.DatabaseURL
+		db, err = postgres.NewPostgresDB(dsn)
+	} else if config.Config.DatabaseType == "sqlite" {
+		dsn := config.Config.DatabaseURL
+		db, err = sqlite.NewSQLiteDB(dsn)
+	} else {
+		logger.Fatalf("Unsupported database type: %s", config.Config.DatabaseType)
+	}
 	if err != nil {
 		logger.Fatalf("Failed to connect to database: %s", err)
 	}
