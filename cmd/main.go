@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"dietsense/internal/api"
+	"dietsense/internal/repositories/postgres"
 	"dietsense/internal/services"
 	"dietsense/pkg/config"
 	"dietsense/pkg/logging"
@@ -23,6 +24,13 @@ func main() {
 	logging.Setup()
 	logger := logging.Log // Use the global logger instance from logging package
 
+	// Initialize the PostgreSQL database
+	dsn := config.Config.DatabaseURL
+	db, err := postgres.NewPostgresDB(dsn)
+	if err != nil {
+		logger.Fatalf("Failed to connect to database: %s", err)
+	}
+
 	// Set up the service factory
 	factory := services.NewServiceFactory(config.Config.ServiceType)
 
@@ -31,8 +39,8 @@ func main() {
 	router.Use(gin.Recovery())            // Adds built-in recovery middleware
 	router.Use(logging.GinLogger(logger)) // Use custom Logrus-based logger middleware
 
-	// Set up API routes
-	api.SetupRoutes(router, factory)
+	// Set up API routes, pass the db instance to handlers or services
+	api.SetupRoutes(router, factory, db)
 
 	// Create the HTTP server
 	server := &http.Server{

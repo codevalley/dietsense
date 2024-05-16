@@ -16,7 +16,7 @@ import (
 func TestAnalyzeEndpointWithMock(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
-	api.SetupRoutes(router, services.NewServiceFactory("mock"))
+	api.SetupRoutes(router, services.NewServiceFactory("mock"), nil)
 
 	req, _ := http.NewRequest("POST", "/api/v1/analyze", nil) // Modify the request as needed for your endpoint
 	resp := httptest.NewRecorder()

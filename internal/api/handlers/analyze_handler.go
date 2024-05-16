@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"dietsense/internal/models"
+	"dietsense/internal/repositories"
 	"dietsense/internal/services"
 	"dietsense/pkg/config"
 	"dietsense/pkg/logging"
@@ -11,9 +13,8 @@ import (
 )
 
 // AnalyzeFood creates a handler function that dynamically chooses the food analysis service based on the request.
-func AnalyzeFood(factory *services.ServiceFactory) gin.HandlerFunc {
+func AnalyzeFood(factory *services.ServiceFactory, db repositories.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		// Attempt to get `service_type` from POST body
 		serviceType := c.PostForm("service")
 
@@ -53,6 +54,18 @@ func AnalyzeFood(factory *services.ServiceFactory) gin.HandlerFunc {
 		result, err := service.AnalyzeFood(file, context)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to analyze image", "details": err.Error()})
+			return
+		}
+
+		//TODO: Placeholder for saving the nutrition detail to the database
+		nutritionDetail := &models.NutritionDetail{
+			Component:  "example",
+			Value:      "example",
+			Unit:       "example",
+			Confidence: 0.99,
+		}
+		if err := db.SaveNutritionDetail(nutritionDetail); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save nutrition detail", "details": err.Error()})
 			return
 		}
 
