@@ -21,9 +21,10 @@ FROM debian:bookworm-slim
 
 # Set the working directory
 WORKDIR /app
-# Update CA certificates
+
+# Update CA certificates and install SQLite
 RUN apt-get update && \
-    apt-get install -y ca-certificates --no-install-recommends && \
+    apt-get install -y ca-certificates sqlite3 --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
     
 # Create a non-root user and switch to it

@@ -7,7 +7,6 @@ import (
 )
 
 // AppConfig holds all the configuration for the application
-// AppConfig holds all the configuration for the application
 type AppConfig struct {
 	ServerAddress string `mapstructure:"server_address"`
 	Environment   string `mapstructure:"environment"`
