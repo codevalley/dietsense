@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"dietsense/internal/models"
 	"dietsense/internal/repositories"
 	"dietsense/internal/services"
 	"dietsense/pkg/config"
@@ -58,16 +57,16 @@ func AnalyzeFood(factory *services.ServiceFactory, db repositories.Database) gin
 		}
 
 		//TODO: Placeholder for saving the nutrition detail to the database
-		nutritionDetail := &models.NutritionDetail{
-			Component:  "example",
-			Value:      "example",
-			Unit:       "example",
-			Confidence: 0.99,
-		}
-		if err := db.SaveNutritionDetail(nutritionDetail); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save nutrition detail", "details": err.Error()})
-			return
-		}
+		// nutritionDetail := &models.NutritionDetail{
+		// 	Component:  "example",
+		// 	Value:      "example",
+		// 	Unit:       "example",
+		// 	Confidence: 0.99,
+		// }
+		// if err := db.SaveNutritionDetail(nutritionDetail); err != nil {
+		// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save nutrition detail", "details": err.Error()})
+		// 	return
+		// }
 
 		// Sending the processed result back as JSON
 		c.JSON(http.StatusOK, result)

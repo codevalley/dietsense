@@ -18,21 +18,49 @@ func NewPostgresDB(dsn string) (*PostgresDB, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Migrate the schema
+	db.AutoMigrate(&models.UserConfig{}, &models.UsageStats{})
 	return &PostgresDB{db: db}, nil
 }
 
-// GetNutritionDetailByID retrieves a nutritional detail by its ID.
-func (p *PostgresDB) GetNutritionDetailByID(id string) (*models.NutritionDetail, error) {
-	var detail models.NutritionDetail
-	if err := p.db.First(&detail, "id = ?", id).Error; err != nil {
+// GetLLMKey retrieves the LLM key for a user.
+func (p *PostgresDB) GetLLMKey(userID string) (string, error) {
+	var userConfig models.UserConfig
+	if err := p.db.First(&userConfig, "user_id = ?", userID).Error; err != nil {
+		return "", err
+	}
+	return userConfig.DefaultModel, nil
+}
+
+// SaveLLMKey saves the LLM key for a user.
+func (p *PostgresDB) SaveLLMKey(userID, key string) error {
+	return p.db.Model(&models.UserConfig{}).Where("user_id = ?", userID).Update("default_model", key).Error
+}
+
+// GetUserConfig retrieves the configuration preferences for a user.
+func (p *PostgresDB) GetUserConfig(userID string) (*models.UserConfig, error) {
+	var config models.UserConfig
+	if err := p.db.First(&config, "user_id = ?", userID).Error; err != nil {
 		return nil, err
 	}
-	return &detail, nil
+	return &config, nil
 }
 
-// SaveNutritionDetail saves a nutritional detail to the database.
-func (p *PostgresDB) SaveNutritionDetail(detail *models.NutritionDetail) error {
-	return p.db.Save(detail).Error
+// SaveUserConfig saves the configuration preferences for a user.
+func (p *PostgresDB) SaveUserConfig(userID string, config *models.UserConfig) error {
+	return p.db.Save(config).Error
 }
 
-// Additional methods can be implemented as needed...
+// GetUserUsageStats retrieves the usage statistics for a user.
+func (p *PostgresDB) GetUserUsageStats(userID string) (*models.UsageStats, error) {
+	var stats models.UsageStats
+	if err := p.db.First(&stats, "user_id = ?", userID).Error; err != nil {
+		return nil, err
+	}
+	return &stats, nil
+}
+
+// SaveUserUsageStats saves the usage statistics for a user.
+func (p *PostgresDB) SaveUserUsageStats(userID string, stats *models.UsageStats) error {
+	return p.db.Save(stats).Error
+}

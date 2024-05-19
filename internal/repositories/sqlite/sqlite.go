@@ -18,21 +18,49 @@ func NewSQLiteDB(dsn string) (*SQLiteDB, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Migrate the schema
+	db.AutoMigrate(&models.UserConfig{}, &models.UsageStats{})
 	return &SQLiteDB{db: db}, nil
 }
 
-// GetNutritionDetailByID retrieves a nutritional detail by its ID.
-func (s *SQLiteDB) GetNutritionDetailByID(id string) (*models.NutritionDetail, error) {
-	var detail models.NutritionDetail
-	if err := s.db.First(&detail, "id = ?", id).Error; err != nil {
+// GetLLMKey retrieves the LLM key for a user.
+func (s *SQLiteDB) GetLLMKey(userID string) (string, error) {
+	var userConfig models.UserConfig
+	if err := s.db.First(&userConfig, "user_id = ?", userID).Error; err != nil {
+		return "", err
+	}
+	return userConfig.DefaultModel, nil
+}
+
+// SaveLLMKey saves the LLM key for a user.
+func (s *SQLiteDB) SaveLLMKey(userID, key string) error {
+	return s.db.Model(&models.UserConfig{}).Where("user_id = ?", userID).Update("default_model", key).Error
+}
+
+// GetUserConfig retrieves the configuration preferences for a user.
+func (s *SQLiteDB) GetUserConfig(userID string) (*models.UserConfig, error) {
+	var config models.UserConfig
+	if err := s.db.First(&config, "user_id = ?", userID).Error; err != nil {
 		return nil, err
 	}
-	return &detail, nil
+	return &config, nil
 }
 
-// SaveNutritionDetail saves a nutritional detail to the database.
-func (s *SQLiteDB) SaveNutritionDetail(detail *models.NutritionDetail) error {
-	return s.db.Save(detail).Error
+// SaveUserConfig saves the configuration preferences for a user.
+func (s *SQLiteDB) SaveUserConfig(userID string, config *models.UserConfig) error {
+	return s.db.Save(config).Error
 }
 
-// Additional methods can be implemented as needed...
+// GetUserUsageStats retrieves the usage statistics for a user.
+func (s *SQLiteDB) GetUserUsageStats(userID string) (*models.UsageStats, error) {
+	var stats models.UsageStats
+	if err := s.db.First(&stats, "user_id = ?", userID).Error; err != nil {
+		return nil, err
+	}
+	return &stats, nil
+}
+
+// SaveUserUsageStats saves the usage statistics for a user.
+func (s *SQLiteDB) SaveUserUsageStats(userID string, stats *models.UsageStats) error {
+	return s.db.Save(stats).Error
+}
