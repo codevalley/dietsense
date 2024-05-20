@@ -4,9 +4,9 @@ import "dietsense/internal/models"
 
 // Database defines the interface for database operations.
 type Database interface {
-	// Save/Retrieve users' LLM Keys
-	GetLLMKey(userID string) (string, error)
-	SaveLLMKey(userID, key string) error
+	// Save/Retrieve users' key-value pairs
+	GetUserKey(userID, keyName string) (string, error)
+	SaveUserKey(userID, keyName, keyValue string) error
 
 	// Save/Retrieve default config preferences
 	GetUserConfig(userID string) (*models.UserConfig, error)

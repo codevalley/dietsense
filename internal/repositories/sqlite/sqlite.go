@@ -23,18 +23,23 @@ func NewSQLiteDB(dsn string) (*SQLiteDB, error) {
 	return &SQLiteDB{db: db}, nil
 }
 
-// GetLLMKey retrieves the LLM key for a user.
-func (s *SQLiteDB) GetLLMKey(userID string) (string, error) {
-	var userConfig models.UserConfig
-	if err := s.db.First(&userConfig, "user_id = ?", userID).Error; err != nil {
+// GetUserKey retrieves a key-value pair for a user.
+func (s *SQLiteDB) GetUserKey(userID, keyName string) (string, error) {
+	var userKey models.UserKey
+	if err := s.db.First(&userKey, "user_id = ? AND key_name = ?", userID, keyName).Error; err != nil {
 		return "", err
 	}
-	return userConfig.DefaultModel, nil
+	return userKey.KeyValue, nil
 }
 
-// SaveLLMKey saves the LLM key for a user.
-func (s *SQLiteDB) SaveLLMKey(userID, key string) error {
-	return s.db.Model(&models.UserConfig{}).Where("user_id = ?", userID).Update("default_model", key).Error
+// SaveUserKey saves a key-value pair for a user.
+func (s *SQLiteDB) SaveUserKey(userID, keyName, keyValue string) error {
+	userKey := models.UserKey{
+		UserID:   userID,
+		KeyName:  keyName,
+		KeyValue: keyValue,
+	}
+	return s.db.Save(&userKey).Error
 }
 
 // GetUserConfig retrieves the configuration preferences for a user.

@@ -32,18 +32,23 @@ func (p *PostgresDB) GetLLMKey(userID string) (string, error) {
 	return userConfig.DefaultModel, nil
 }
 
-// SaveLLMKey saves the LLM key for a user.
-func (p *PostgresDB) SaveLLMKey(userID, key string) error {
-	return p.db.Model(&models.UserConfig{}).Where("user_id = ?", userID).Update("default_model", key).Error
+// GetUserKey retrieves a key-value pair for a user.
+func (p *PostgresDB) GetUserKey(userID, keyName string) (string, error) {
+	var userKey models.UserKey
+	if err := p.db.First(&userKey, "user_id = ? AND key_name = ?", userID, keyName).Error; err != nil {
+		return "", err
+	}
+	return userKey.KeyValue, nil
 }
 
-// GetUserConfig retrieves the configuration preferences for a user.
-func (p *PostgresDB) GetUserConfig(userID string) (*models.UserConfig, error) {
-	var config models.UserConfig
-	if err := p.db.First(&config, "user_id = ?", userID).Error; err != nil {
-		return nil, err
+// SaveUserKey saves a key-value pair for a user.
+func (p *PostgresDB) SaveUserKey(userID, keyName, keyValue string) error {
+	userKey := models.UserKey{
+		UserID:   userID,
+		KeyName:  keyName,
+		KeyValue: keyValue,
 	}
-	return &config, nil
+	return p.db.Save(&userKey).Error
 }
 
 // SaveUserConfig saves the configuration preferences for a user.
