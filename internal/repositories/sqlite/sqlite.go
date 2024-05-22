@@ -69,3 +69,17 @@ func (s *SQLiteDB) GetUserUsageStats(userID string) (*models.UsageStats, error) 
 func (s *SQLiteDB) SaveUserUsageStats(userID string, stats *models.UsageStats) error {
 	return s.db.Save(stats).Error
 }
+
+// GetAPIKey retrieves an API key.
+func (s *SQLiteDB) GetAPIKey(key string) (*models.APIKey, error) {
+	var apiKey models.APIKey
+	if err := s.db.First(&apiKey, "key = ?", key).Error; err != nil {
+		return nil, err
+	}
+	return &apiKey, nil
+}
+
+// SaveAPIKey saves an API key.
+func (s *SQLiteDB) SaveAPIKey(apiKey *models.APIKey) error {
+	return s.db.Save(apiKey).Error
+}

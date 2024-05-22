@@ -69,3 +69,17 @@ func (p *PostgresDB) GetUserUsageStats(userID string) (*models.UsageStats, error
 func (p *PostgresDB) SaveUserUsageStats(userID string, stats *models.UsageStats) error {
 	return p.db.Save(stats).Error
 }
+
+// GetAPIKey retrieves an API key.
+func (p *PostgresDB) GetAPIKey(key string) (*models.APIKey, error) {
+	var apiKey models.APIKey
+	if err := p.db.First(&apiKey, "key = ?", key).Error; err != nil {
+		return nil, err
+	}
+	return &apiKey, nil
+}
+
+// SaveAPIKey saves an API key.
+func (p *PostgresDB) SaveAPIKey(apiKey *models.APIKey) error {
+	return p.db.Save(apiKey).Error
+}
