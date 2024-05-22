@@ -15,4 +15,8 @@ type Database interface {
 	// Store/Retrieve aggregate info of users LLM calls
 	GetUserUsageStats(userID string) (*models.UsageStats, error)
 	SaveUserUsageStats(userID string, stats *models.UsageStats) error
+
+	// Save/Retrieve API keys
+	GetAPIKey(key string) (*models.APIKey, error)
+	SaveAPIKey(apiKey *models.APIKey) error
 }
