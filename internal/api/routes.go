@@ -5,6 +5,7 @@ import (
 	"dietsense/internal/middleware"
 	"dietsense/internal/repositories"
 	"dietsense/internal/services"
+	"dietsense/pkg/config"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,7 +16,8 @@ func SetupRoutes(router *gin.Engine, factory *services.ServiceFactory, db reposi
 		c.JSON(200, gin.H{"message": "pong"})
 	})
 	// Define allowed IP addresses
-	allowedIPs := []string{"127.0.0.1", "::1", "your_allowed_ip1", "your_allowed_ip2"}
+	//allowedIPs := []string{"127.0.0.1", "::1", "your_allowed_ip1", "your_allowed_ip2"}
+	allowedIPs := config.Config.AllowedIPs
 
 	api := router.Group("/api/v1")
 	{
