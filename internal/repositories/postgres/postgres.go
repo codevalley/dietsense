@@ -41,6 +41,15 @@ func (p *PostgresDB) GetUserKey(userID, keyName string) (string, error) {
 	return userKey.KeyValue, nil
 }
 
+// GetUserConfig retrieves the configuration preferences for a user.
+func (p *PostgresDB) GetUserConfig(userID string) (*models.UserConfig, error) {
+	var config models.UserConfig
+	if err := p.db.First(&config, "user_id = ?", userID).Error; err != nil {
+		return nil, err
+	}
+	return &config, nil
+}
+
 // SaveUserKey saves a key-value pair for a user.
 func (p *PostgresDB) SaveUserKey(userID, keyName, keyValue string) error {
 	userKey := models.UserKey{
