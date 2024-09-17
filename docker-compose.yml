@@ -1,11 +1,13 @@
-version: '3.8'
-
 services:
   web:
     image: dietsense
+    build: .
     ports:
       - "8080:8080"
     environment:
       - GIN_MODE=release
     volumes:
-      - ./data:/app/data  # Mount a host directory as a data volume to persist SQLite database
+      - ./data:/app/data
+      - ./config.yaml:/app/config.yaml:ro
+    # Remove or comment out the user line if not necessary
+    # user: "1000:1000"
