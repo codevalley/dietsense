@@ -24,7 +24,6 @@ DietSense is an AI-powered nutrition analysis service that leverages advanced ma
 - **API Documentation**: Swagger
 - **Testing**: Go Testing Package and Testify
 - **Containerization**: Docker
-- **Cloud Deployment**: Azure
 
 ## Getting Started
 
