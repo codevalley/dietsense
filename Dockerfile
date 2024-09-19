@@ -49,7 +49,7 @@ USER dietuser
 EXPOSE 8080
 
 # Include a healthcheck (optional)
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=60s --timeout=5s --start-period=8s --retries=3 \
   CMD curl -f http://localhost:8080/health || exit 1
 
 # Set the entry point to the application executable

@@ -1,0 +1,60 @@
+{
+    "nutrition":[
+       {
+          "component":"Calories",
+          "confidence":0.7,
+          "unit":"kcal",
+          "value":70
+       },
+       {
+          "component":"Total Fat",
+          "confidence":0.6,
+          "unit":"g",
+          "value":2
+       },
+       {
+          "component":"Saturated Fat",
+          "confidence":0.8,
+          "unit":"g",
+          "value":0
+       },
+       {
+          "component":"Cholesterol",
+          "confidence":0.9,
+          "unit":"mg",
+          "value":0
+       },
+       {
+          "component":"Sodium",
+          "confidence":0.6,
+          "unit":"mg",
+          "value":150
+       },
+       {
+          "component":"Total Carbohydrates",
+          "confidence":0.7,
+          "unit":"g",
+          "value":8
+       },
+       {
+          "component":"Dietary Fiber",
+          "confidence":0.8,
+          "unit":"g",
+          "value":6
+       },
+       {
+          "component":"Sugars",
+          "confidence":0.6,
+          "unit":"g",
+          "value":2
+       },
+       {
+          "component":"Protein",
+          "confidence":0.7,
+          "unit":"g",
+          "value":3
+       }
+    ],
+    "service":"claude",
+    "summary":"A healthy seaweed salad containing wakame, sprouts, sesame seeds, and grated carrots or daikon radish. Wakame is low in calories but rich in minerals, vitamins, and dietary fiber. This salad provides beneficial nutrients while being relatively low in fat and calories."
+ }
