@@ -71,9 +71,7 @@ This document outlines the workflow for developing our app. The workflow is desi
 4. **Referencing Foundational Documents**
 
    - When working on tasks, refer to the relevant sections in:
-     - `Pitch.md` for understanding the overarching goals and phases.
      - `Approach.md` for detailed feature descriptions and user journeys.
-     - `DesignLanguage.md` for UI/UX guidelines and consistency.
      - `ProjectPlan.md` for context on how tasks fit into the overall project timeline.
 
 5. **Issue Tracking and Resolution**
@@ -112,7 +110,7 @@ This document outlines the workflow for developing our app. The workflow is desi
 
 - **Document Updates**
 
-  - Keep `Approach.md`, `Pitch.md`, `DesignLanguage.md`, or `ProjectPlan.md` like an immutable document and add any suggestions to the bottom of the document under "Suggestion" section, note these in `progress.md`.
+  - Keep `Approach.md` or `ProjectPlan.md` like an immutable document and add any suggestions to the bottom of the document under "Suggestion" section, note these in `progress.md`.
   - Summarize the changes and their impact on current tasks.
 
 ### Document Versioning
@@ -142,7 +140,7 @@ This document outlines the workflow for developing our app. The workflow is desi
 - [x] **Task 1**: Description of task 1
   - Notes: Any relevant comments or findings
 - [x] **Task 2**: Description of task 2
-  - Notes: Reference to `DesignLanguage.md` section on typography
+  - Notes: Reference to `Approach.md` section on typography
 
 ### In-Progress Tasks
 
@@ -170,9 +168,7 @@ This document outlines the workflow for developing our app. The workflow is desi
 
 ## References
 
-- [Pitch.md](./Pitch.md)
 - [Approach.md](./Approach.md)
-- [DesignLanguage.md](./DesignLanguage.md)
 - [ProjectPlan.md](./ProjectPlan.md)
 ```
 
