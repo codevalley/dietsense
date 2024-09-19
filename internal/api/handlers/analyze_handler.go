@@ -33,26 +33,29 @@ func AnalyzeFood(factory *services.ServiceFactory, db repositories.Database) gin
 			return
 		}
 
-		// Extracting image and context from the form-data
+		var result map[string]interface{}
+
+		// Check if an image file is present in the request
 		fileHeader, err := c.FormFile("image")
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file upload"})
-			return
+			// No image file, use text-only analysis
+			context := fmt.Sprintf("%s\n%s", c.PostForm("context"), config.Config.ContextString)
+			result, err = service.AnalyzeFoodText(context)
+		} else {
+			// Image file present, proceed with image analysis
+			file, err := fileHeader.Open()
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot open uploaded file"})
+				return
+			}
+			defer file.Close()
+
+			context := fmt.Sprintf("Here is some info about the picture:*%s*\n%s", c.PostForm("context"), config.Config.ContextString)
+			result, err = service.AnalyzeFood(file, context)
 		}
 
-		file, err := fileHeader.Open()
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot open uploaded file"})
-			return
-		}
-		defer file.Close()
-
-		context := fmt.Sprintf("Here is some info about the picture:*%s*\n%s", c.PostForm("context"), config.Config.ContextString)
-
-		// Calling the service to process the image
-		result, err := service.AnalyzeFood(file, context)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to analyze image", "details": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to analyze", "details": err.Error()})
 			return
 		}
 

@@ -19,3 +19,8 @@ func (s *LLAMAService) AnalyzeFood(file io.Reader, context string) (map[string]i
 	// Logic to call LLAMA API
 	return map[string]interface{}{"result": "data from LLAMA"}, nil
 }
+
+func (s *LLAMAService) AnalyzeFoodText(context string) (map[string]interface{}, error) {
+	// Logic to call LLAMA API for text-only analysis
+	return map[string]interface{}{"result": "text-only data from LLAMA"}, nil
+}

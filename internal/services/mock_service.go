@@ -79,3 +79,15 @@ func (s *MockImageAnalysisService) AnalyzeFood(file io.Reader, context string) (
 	}
 	return mockResponse, nil
 }
+
+func (s *MockImageAnalysisService) AnalyzeFoodText(context string) (map[string]interface{}, error) {
+	// Return the same mock response as AnalyzeFood, but with a different summary
+	mockResponse := map[string]interface{}{
+		"nutrition": []map[string]interface{}{
+			// ... (same nutrition data as before)
+		},
+		"service": "mock",
+		"summary": "This is a mock summary for text-only analysis. It describes a hypothetical meal based on the provided context.",
+	}
+	return mockResponse, nil
+}

@@ -112,3 +112,26 @@ func parseOpenAIResponse(response map[string]interface{}) (map[string]interface{
 	result["service"] = "openAI"
 	return result, nil
 }
+
+func (s *OpenAIService) AnalyzeFoodText(context string) (map[string]interface{}, error) {
+	payload := createTextPayload(context)
+	responseData, err := utils.SendHTTPRequest("https://api.openai.com/v1/chat/completions", s.APIKey, payload)
+	if err != nil {
+		return nil, err
+	}
+
+	return parseOpenAIResponse(responseData)
+}
+
+func createTextPayload(context string) map[string]interface{} {
+	return map[string]interface{}{
+		"model": "gpt-4",
+		"messages": []map[string]interface{}{
+			{
+				"role":    "user",
+				"content": context,
+			},
+		},
+		"max_tokens": 4096,
+	}
+}

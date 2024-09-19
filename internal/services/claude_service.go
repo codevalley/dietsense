@@ -31,7 +31,7 @@ func (s *ClaudeService) AnalyzeFood(file io.Reader, userContext string) (map[str
 	}
 
 	resp, err := client.CreateMessages(context.Background(), anthropic.MessagesRequest{
-		Model: anthropic.ModelClaude3Opus20240229,
+		Model: anthropic.ModelClaude3Haiku20240307,
 		Messages: []anthropic.Message{
 			{
 				Role: anthropic.RoleUser,
@@ -41,6 +41,33 @@ func (s *ClaudeService) AnalyzeFood(file io.Reader, userContext string) (map[str
 						MediaType: "image/jpeg",
 						Data:      imageData,
 					}),
+					anthropic.NewTextMessageContent(userContext),
+				},
+			},
+		},
+		MaxTokens: 1000,
+	})
+	if err != nil {
+		var e *anthropic.APIError
+		if errors.As(err, &e) {
+			return nil, fmt.Errorf("messages error, type: %s, message: %s", e.Type, e.Message)
+		} else {
+			return nil, fmt.Errorf("messages error: %w", err)
+		}
+	}
+
+	return parseClaudeResponse(&resp)
+}
+
+func (s *ClaudeService) AnalyzeFoodText(userContext string) (map[string]interface{}, error) {
+	client := anthropic.NewClient(s.APIKey)
+
+	resp, err := client.CreateMessages(context.Background(), anthropic.MessagesRequest{
+		Model: anthropic.ModelClaude3Haiku20240307,
+		Messages: []anthropic.Message{
+			{
+				Role: anthropic.RoleUser,
+				Content: []anthropic.MessageContent{
 					anthropic.NewTextMessageContent(userContext),
 				},
 			},
