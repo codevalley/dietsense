@@ -1,6 +1,7 @@
 package services
 
 import (
+	"dietsense/pkg/logging"
 	"dietsense/pkg/utils"
 	"encoding/json"
 	"fmt"
@@ -33,6 +34,7 @@ func NewOpenAIService(apiKey string, modelType string) *OpenAIService {
 
 func (s *OpenAIService) AnalyzeFood(file io.Reader, context string) (map[string]interface{}, error) {
 	encodedImage := utils.EncodeToBase64(file)
+	logging.Log.Info("OpenAI Service: Analyzing food image, model: " + s.getModel())
 	payload := s.createPayload(encodedImage, context)
 	responseData, err := utils.SendHTTPRequest("https://api.openai.com/v1/chat/completions", s.APIKey, payload)
 	if err != nil {
@@ -128,6 +130,7 @@ func parseOpenAIResponse(response map[string]interface{}) (map[string]interface{
 
 func (s *OpenAIService) AnalyzeFoodText(context string) (map[string]interface{}, error) {
 	payload := s.createTextPayload(context)
+	logging.Log.Info("OpenAI Service: Analyzing food description, model: " + s.getModel())
 	responseData, err := utils.SendHTTPRequest("https://api.openai.com/v1/chat/completions", s.APIKey, payload)
 	if err != nil {
 		return nil, err

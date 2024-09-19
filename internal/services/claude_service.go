@@ -38,6 +38,7 @@ func (s *ClaudeService) getModel() string {
 func (s *ClaudeService) AnalyzeFood(file io.Reader, userContext string) (map[string]interface{}, error) {
 	client := anthropic.NewClient(s.APIKey)
 
+	logging.Log.Info("Claude Service: Analyzing food image, model: " + s.getModel())
 	imageData, err := io.ReadAll(file)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read image file: %w", err)
@@ -74,7 +75,7 @@ func (s *ClaudeService) AnalyzeFood(file io.Reader, userContext string) (map[str
 
 func (s *ClaudeService) AnalyzeFoodText(userContext string) (map[string]interface{}, error) {
 	client := anthropic.NewClient(s.APIKey)
-
+	logging.Log.Info("Claude Service: Analyzing food description, model: " + s.getModel())
 	resp, err := client.CreateMessages(context.Background(), anthropic.MessagesRequest{
 		Model: s.getModel(),
 		Messages: []anthropic.Message{
