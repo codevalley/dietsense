@@ -6,12 +6,14 @@ import (
 
 // LLAMAService implements the ImageAnalysisService for LLAMA.
 type LLAMAService struct {
-	APIKey string
+	APIKey    string
+	ModelType string
 }
 
-func NewLLAMAService(apiKey string) *LLAMAService {
+func NewLLAMAService(apiKey string, modelType string) *LLAMAService {
 	return &LLAMAService{
-		APIKey: apiKey,
+		APIKey:    apiKey,
+		ModelType: modelType,
 	}
 }
 

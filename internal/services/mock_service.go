@@ -6,11 +6,15 @@ import (
 
 // MockImageAnalysisService is a mock implementation of the ImageAnalysisService
 // for testing purposes.
-type MockImageAnalysisService struct{}
+type MockImageAnalysisService struct {
+	ModelType string
+}
 
 // NewMockImageAnalysisService creates a new instance of MockImageAnalysisService.
-func NewMockImageAnalysisService() *MockImageAnalysisService {
-	return &MockImageAnalysisService{}
+func NewMockImageAnalysisService(modelType string) *MockImageAnalysisService {
+	return &MockImageAnalysisService{
+		ModelType: modelType,
+	}
 }
 
 // AnalyzeImage implements the ImageAnalysisService interface.
@@ -74,8 +78,9 @@ func (s *MockImageAnalysisService) AnalyzeFood(file io.Reader, context string) (
 				"value":      3,
 			},
 		},
-		"service": "mock",
-		"summary": "This is a mock summary for testing purposes. It describes a healthy seaweed salad containing wakame, sprouts, sesame seeds, and grated carrots or daikon radish.",
+		"service":    "mock",
+		"summary":    "This is a mock summary for testing purposes. It describes a healthy seaweed salad containing wakame, sprouts, sesame seeds, and grated carrots or daikon radish.",
+		"model_type": s.ModelType,
 	}
 	return mockResponse, nil
 }
@@ -86,8 +91,9 @@ func (s *MockImageAnalysisService) AnalyzeFoodText(context string) (map[string]i
 		"nutrition": []map[string]interface{}{
 			// ... (same nutrition data as before)
 		},
-		"service": "mock",
-		"summary": "This is a mock summary for text-only analysis. It describes a hypothetical meal based on the provided context.",
+		"service":    "mock",
+		"summary":    "This is a mock summary for text-only analysis. It describes a hypothetical meal based on the provided context.",
+		"model_type": s.ModelType,
 	}
 	return mockResponse, nil
 }

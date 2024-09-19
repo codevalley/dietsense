@@ -13,12 +13,25 @@ import (
 )
 
 type ClaudeService struct {
-	APIKey string
+	APIKey    string
+	ModelType string
 }
 
-func NewClaudeService(apiKey string) *ClaudeService {
+func NewClaudeService(apiKey string, modelType string) *ClaudeService {
 	return &ClaudeService{
-		APIKey: apiKey,
+		APIKey:    apiKey,
+		ModelType: modelType,
+	}
+}
+
+func (s *ClaudeService) getModel() string {
+	switch s.ModelType {
+	case "fast":
+		return anthropic.ModelClaude3Haiku20240307
+	case "accurate":
+		return anthropic.ModelClaude3Sonnet20240229
+	default:
+		return anthropic.ModelClaude3Opus20240229
 	}
 }
 
@@ -31,7 +44,7 @@ func (s *ClaudeService) AnalyzeFood(file io.Reader, userContext string) (map[str
 	}
 
 	resp, err := client.CreateMessages(context.Background(), anthropic.MessagesRequest{
-		Model: anthropic.ModelClaude3Haiku20240307,
+		Model: s.getModel(),
 		Messages: []anthropic.Message{
 			{
 				Role: anthropic.RoleUser,
@@ -63,7 +76,7 @@ func (s *ClaudeService) AnalyzeFoodText(userContext string) (map[string]interfac
 	client := anthropic.NewClient(s.APIKey)
 
 	resp, err := client.CreateMessages(context.Background(), anthropic.MessagesRequest{
-		Model: anthropic.ModelClaude3Haiku20240307,
+		Model: s.getModel(),
 		Messages: []anthropic.Message{
 			{
 				Role: anthropic.RoleUser,

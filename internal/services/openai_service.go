@@ -8,7 +8,8 @@ import (
 )
 
 type OpenAIService struct {
-	APIKey string
+	APIKey    string
+	ModelType string
 }
 
 type NutritionDetail struct {
@@ -23,15 +24,16 @@ type Dietsense struct {
 	Nutrition []NutritionDetail `json:"nutrition"`
 }
 
-func NewOpenAIService(apiKey string) *OpenAIService {
+func NewOpenAIService(apiKey string, modelType string) *OpenAIService {
 	return &OpenAIService{
-		APIKey: apiKey,
+		APIKey:    apiKey,
+		ModelType: modelType,
 	}
 }
 
 func (s *OpenAIService) AnalyzeFood(file io.Reader, context string) (map[string]interface{}, error) {
 	encodedImage := utils.EncodeToBase64(file)
-	payload := createPayload(encodedImage, context)
+	payload := s.createPayload(encodedImage, context)
 	responseData, err := utils.SendHTTPRequest("https://api.openai.com/v1/chat/completions", s.APIKey, payload)
 	if err != nil {
 		return nil, err
@@ -40,9 +42,20 @@ func (s *OpenAIService) AnalyzeFood(file io.Reader, context string) (map[string]
 	return parseOpenAIResponse(responseData)
 }
 
-func createPayload(encodedImage, context string) map[string]interface{} {
+func (s *OpenAIService) getModel() string {
+	switch s.ModelType {
+	case "fast":
+		return "gpt-4-vision-preview" //"gpt-3.5-turbo"
+	case "accurate":
+		return "gpt-4-vision-preview" //"gpt-4"
+	default:
+		return "gpt-4-vision-preview" //"gpt-4-turbo-preview"
+	}
+}
+
+func (s *OpenAIService) createPayload(encodedImage, context string) map[string]interface{} {
 	return map[string]interface{}{
-		"model": "gpt-4-vision-preview",
+		"model": s.getModel(),
 		"messages": []map[string]interface{}{
 			{
 				"role": "user",
@@ -114,7 +127,7 @@ func parseOpenAIResponse(response map[string]interface{}) (map[string]interface{
 }
 
 func (s *OpenAIService) AnalyzeFoodText(context string) (map[string]interface{}, error) {
-	payload := createTextPayload(context)
+	payload := s.createTextPayload(context)
 	responseData, err := utils.SendHTTPRequest("https://api.openai.com/v1/chat/completions", s.APIKey, payload)
 	if err != nil {
 		return nil, err
@@ -123,9 +136,9 @@ func (s *OpenAIService) AnalyzeFoodText(context string) (map[string]interface{},
 	return parseOpenAIResponse(responseData)
 }
 
-func createTextPayload(context string) map[string]interface{} {
+func (s *OpenAIService) createTextPayload(context string) map[string]interface{} {
 	return map[string]interface{}{
-		"model": "gpt-4",
+		"model": s.getModel(),
 		"messages": []map[string]interface{}{
 			{
 				"role":    "user",

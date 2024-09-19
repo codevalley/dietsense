@@ -24,11 +24,11 @@ func (f *ServiceFactory) GetService(serviceType string) (FoodAnalysisService, er
 
 	switch serviceType {
 	case "openai":
-		return NewOpenAIService(config.Config.OpenaiKey), nil
+		return NewOpenAIService(config.Config.OpenaiKey, config.Config.ModelType), nil
 	case "claude":
-		return NewClaudeService(config.Config.ClaudeKey), nil
+		return NewClaudeService(config.Config.ClaudeKey, config.Config.ModelType), nil
 	case "mock":
-		return NewMockImageAnalysisService(), nil
+		return NewMockImageAnalysisService(config.Config.ModelType), nil
 	default:
 		log.Printf("Unknown service type: %s, falling back to default.", serviceType)
 		return nil, fmt.Errorf("unknown service type: %s", serviceType)

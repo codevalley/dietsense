@@ -18,6 +18,7 @@ type AppConfig struct {
 	ServiceType   string   `mapstructure:"service_type"`  // "mock" or "openai"
 	DatabaseType  string   `mapstructure:"database_type"` // "sqlite" or "postgres"
 	ContextString string   `mapstructure:"context_string"`
+	ModelType     string   `mapstructure:"model_type"` // "fast", "normal", or "accurate"
 }
 
 // Config is the exported configuration object
@@ -36,6 +37,7 @@ func Setup() {
 	viper.SetDefault("server_address", ":8080")
 	viper.SetDefault("environment", "development")
 	viper.SetDefault("service_type", "mock") // Default to mock service
+	viper.SetDefault("model_type", "normal")
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file, %s", err)
