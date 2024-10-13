@@ -43,7 +43,7 @@ func main() {
 	}
 
 	// Set up the service factory
-	factory := services.NewServiceFactory(config.Config.ServiceType)
+	factory := services.NewServiceFactory(&config.Config)
 
 	// Set up the Gin router with logging middleware
 	router := gin.New()                   // Creates a router without any middleware by default

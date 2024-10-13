@@ -3,34 +3,50 @@ package services
 import (
 	"dietsense/pkg/config"
 	"fmt"
-	"log"
 )
 
-// ServiceFactory manages creation of food analysis services.
 type ServiceFactory struct {
-	DefaultService string
+	Config *config.AppConfig
 }
 
-// NewServiceFactory creates a new instance of a service factory.
-func NewServiceFactory(defaultService string) *ServiceFactory {
-	return &ServiceFactory{DefaultService: defaultService}
+func NewServiceFactory(config *config.AppConfig) *ServiceFactory {
+	return &ServiceFactory{Config: config}
 }
 
-// GetService returns the food analysis service based on the requested type.
-func (f *ServiceFactory) GetService(serviceType string) (FoodAnalysisService, error) {
-	if serviceType == "" {
-		serviceType = f.DefaultService
+func (f *ServiceFactory) GetImageClassifierService() (ImageClassifier, error) {
+	switch f.Config.ImageClassifierService {
+	case "openai":
+		return NewOpenAIService(f.Config.OpenaiKey, f.Config.OpenAIModelForClassification), nil
+	case "claude":
+		return NewClaudeService(f.Config.ClaudeKey, f.Config.ClaudeModelForClassification), nil
+	default:
+		return nil, fmt.Errorf("unknown image classifier service: %s", f.Config.ImageClassifierService)
+	}
+}
+
+func (f *ServiceFactory) GetAnalyzerService(inputType InputType) (FoodAnalysisService, error) {
+	var serviceType string
+	switch inputType {
+	case InputTypeBarcode:
+		serviceType = f.Config.BarcodeAnalyzerService
+	case InputTypeFoodImage:
+		serviceType = f.Config.FoodImageAnalyzerService
+	case InputTypeNutritionLabel:
+		serviceType = f.Config.NutritionLabelAnalyzerService
+	case InputTypeText:
+		serviceType = f.Config.TextAnalyzerService
+	default:
+		serviceType = f.Config.DefaultAnalyzerService
 	}
 
 	switch serviceType {
 	case "openai":
-		return NewOpenAIService(config.Config.OpenaiKey, config.Config.ModelType), nil
+		return NewOpenAIService(f.Config.OpenaiKey, f.Config.OpenAIModelForAnalysis), nil
 	case "claude":
-		return NewClaudeService(config.Config.ClaudeKey, config.Config.ModelType), nil
+		return NewClaudeService(f.Config.ClaudeKey, f.Config.ClaudeModelForAnalysis), nil
 	case "mock":
-		return NewMockImageAnalysisService(config.Config.ModelType), nil
+		return NewMockImageAnalysisService(f.Config.MockServiceType), nil
 	default:
-		log.Printf("Unknown service type: %s, falling back to default.", serviceType)
-		return nil, fmt.Errorf("unknown service type: %s", serviceType)
+		return nil, fmt.Errorf("unknown analyzer service: %s", serviceType)
 	}
 }

@@ -76,24 +76,32 @@ func NewMockImageAnalysisService(modelType string) *MockImageAnalysisService {
 	}
 }
 
-// getMockResponse returns a mock response with the given summary
-func (s *MockImageAnalysisService) getMockResponse(summary string) map[string]interface{} {
-	return map[string]interface{}{
-		"nutrition":  mockNutritionData,
-		"service":    "mock",
-		"summary":    summary,
-		"model_type": s.ModelType,
-	}
+// ClassifyImage implements the ImageClassifier interface.
+func (s *MockImageAnalysisService) ClassifyImage(file io.Reader) (InputType, error) {
+	logging.Log.Info("Mock Service: Classifying image, model: " + s.ModelType)
+	return InputTypeFoodImage, nil // Always return FoodImage for simplicity
 }
 
-// AnalyzeFood implements the ImageAnalysisService interface.
-// It ignores the input and returns a fixed, predefined result.
-func (s *MockImageAnalysisService) AnalyzeFood(file io.Reader, context string) (map[string]interface{}, error) {
+// AnalyzeFood implements the FoodAnalysisService interface.
+func (s *MockImageAnalysisService) AnalyzeFood(file io.Reader, context string, inputType InputType) (*AnalysisResult, error) {
 	logging.Log.Info("Mock Service: Analyzing food image, model: " + s.ModelType)
-	return s.getMockResponse("This is a mock summary for testing purposes. It describes a healthy seaweed salad containing wakame, sprouts, sesame seeds, and grated carrots or daikon radish."), nil
+	return &AnalysisResult{
+		NutritionInfo: mockNutritionData[0], // Just use the first item for simplicity
+		Summary:       "This is a mock summary for testing purposes. It describes a healthy seaweed salad containing wakame, sprouts, sesame seeds, and grated carrots or daikon radish.",
+		Confidence:    0.8,
+		InputType:     inputType,
+		Service:       "mock",
+	}, nil
 }
 
-func (s *MockImageAnalysisService) AnalyzeFoodText(context string) (map[string]interface{}, error) {
+// AnalyzeFoodText implements the FoodAnalysisService interface.
+func (s *MockImageAnalysisService) AnalyzeFoodText(context string) (*AnalysisResult, error) {
 	logging.Log.Info("Mock Service: Analyzing food description, model: " + s.ModelType)
-	return s.getMockResponse("This is a mock summary for text-only analysis. It describes a hypothetical meal based on the provided context."), nil
+	return &AnalysisResult{
+		NutritionInfo: mockNutritionData[0], // Just use the first item for simplicity
+		Summary:       "This is a mock summary for text-only analysis. It describes a hypothetical meal based on the provided context.",
+		Confidence:    0.8,
+		InputType:     InputTypeText,
+		Service:       "mock",
+	}, nil
 }

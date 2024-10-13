@@ -4,45 +4,31 @@ import (
 	"dietsense/internal/repositories"
 	"dietsense/internal/services"
 	"dietsense/pkg/config"
-	"dietsense/pkg/logging"
 	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-// AnalyzeFood creates a handler function that dynamically chooses the food analysis service based on the request.
 func AnalyzeFood(factory *services.ServiceFactory, db repositories.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Attempt to get `service_type` from POST body
-		serviceType := c.PostForm("service")
+		// Stage 1: Determine input type
+		fileHeader, _ := c.FormFile("image")
+		inputText := c.PostForm("context")
 
-		// If not found in post body try from query parameters, fallback to default if not provided
-		if serviceType == "" {
-			serviceType = c.Query("service")
-		}
-		if serviceType == "" {
-			serviceType = factory.DefaultService // Use default service type if not specified
-		}
+		var inputType services.InputType
+		var err error
 
-		logging.Log.Info("Service type: " + serviceType)
-		// Get the service implementation based on the provided or default 'service_type'
-		service, err := factory.GetService(serviceType)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		var result map[string]interface{}
-
-		// Check if an image file is present in the request
-		fileHeader, err := c.FormFile("image")
-		if err != nil {
-			// No image file, use text-only analysis
-			context := fmt.Sprintf("%s\n%s", c.PostForm("context"), config.Config.ContextString)
-			result, err = service.AnalyzeFoodText(context)
+		if fileHeader == nil {
+			inputType = services.InputTypeText
 		} else {
-			// Image file present, proceed with image analysis
+			// Use the image classifier service to determine input type
+			classifierService, err := factory.GetImageClassifierService()
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get image classifier service", "details": err.Error()})
+				return
+			}
+
 			file, err := fileHeader.Open()
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot open uploaded file"})
@@ -50,8 +36,29 @@ func AnalyzeFood(factory *services.ServiceFactory, db repositories.Database) gin
 			}
 			defer file.Close()
 
-			context := fmt.Sprintf("Here is some info about the picture:*%s*\n%s", c.PostForm("context"), config.Config.ContextString)
-			result, err = service.AnalyzeFood(file, context)
+			inputType, err = classifierService.ClassifyImage(file)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to classify image", "details": err.Error()})
+				return
+			}
+		}
+
+		// Stage 2: Analyze input based on type
+		analyzerService, err := factory.GetAnalyzerService(inputType)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get analyzer service", "details": err.Error()})
+			return
+		}
+
+		var result *services.AnalysisResult
+		context := fmt.Sprintf("%s\n%s", inputText, config.Config.ContextString)
+
+		if inputType == services.InputTypeText {
+			result, err = analyzerService.AnalyzeFoodText(context)
+		} else {
+			file, _ := fileHeader.Open()
+			defer file.Close()
+			result, err = analyzerService.AnalyzeFood(file, context, inputType)
 		}
 
 		if err != nil {
@@ -59,19 +66,15 @@ func AnalyzeFood(factory *services.ServiceFactory, db repositories.Database) gin
 			return
 		}
 
-		//TODO: Placeholder for saving the nutrition detail to the database
-		// nutritionDetail := &models.NutritionDetail{
-		// 	Component:  "example",
-		// 	Value:      "example",
-		// 	Unit:       "example",
-		// 	Confidence: 0.99,
-		// }
-		// if err := db.SaveNutritionDetail(nutritionDetail); err != nil {
-		// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save nutrition detail", "details": err.Error()})
-		// 	return
-		// }
+		// Stage 3: Compile and send response
+		response := map[string]interface{}{
+			"nutrition_info": result.NutritionInfo,
+			"summary":        result.Summary,
+			"confidence":     result.Confidence,
+			"input_type":     result.InputType,
+			"service":        result.Service,
+		}
 
-		// Sending the processed result back as JSON
-		c.JSON(http.StatusOK, result)
+		c.JSON(http.StatusOK, response)
 	}
 }
