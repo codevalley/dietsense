@@ -1,7 +1,13 @@
-# Use the official Go image as a base image for the build stage
-FROM golang:1.21 AS builder
+# Build stage
+FROM --platform=$BUILDPLATFORM golang:1.21-bullseye AS builder
+
+ARG TARGETARCH
+ARG BUILDPLATFORM
 
 WORKDIR /app
+
+# Install build essentials and SQLite development libraries
+RUN apt-get update && apt-get install -y build-essential libsqlite3-dev
 
 # Copy the Go mod and sum files, and download the dependencies
 COPY go.mod go.sum ./
@@ -14,19 +20,20 @@ COPY . .
 WORKDIR /app/cmd
 
 # Build the application
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o ../main .
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=$TARGETARCH go build -o ../main .
 
-# Start a new stage from scratch using a minimal base image
-FROM debian:bookworm-slim
+# Final stage
+FROM --platform=$TARGETPLATFORM debian:bullseye-slim
 
 # Set the working directory
 WORKDIR /app
 
-# Install CA certificates and runtime dependencies
+# Install CA certificates, SQLite3, and runtime dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     ca-certificates \
     sqlite3 \
+    libsqlite3-0 \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -36,6 +43,9 @@ RUN groupadd -g 1000 dietuser && \
 
 # Copy the pre-built binary file from the previous stage
 COPY --from=builder /app/main .
+
+# Copy the config file
+COPY config.yaml .
 
 # Create the /app/data directory and set permissions
 RUN mkdir -p /app/data && \

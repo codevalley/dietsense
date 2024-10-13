@@ -23,6 +23,7 @@ Gopkg.lock
 # JetBrains IDEs
 .idea/
 
+data/
 # VSCode
 .vscode/
 
