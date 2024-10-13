@@ -1,0 +1,38 @@
+classify_image_prompt: |
+  Classify this image as one of the following: food photo, nutrition label, barcode, or unknown. 
+  Respond with just the classification.
+
+food_image_prompt: |
+  Analyze this food image and provide nutritional information.
+  Be as detailed as possible, including estimated portion sizes if applicable.
+
+nutrition_label_prompt: |
+  Extract and summarize the nutritional information from this nutrition label.
+  Include all relevant details such as serving size, calories, macronutrients, and any additional information present.
+
+barcode_prompt: |
+  This is a barcode. If you can read it, provide the encoded information and any related nutritional data if available.
+  If nutritional data is not directly available, suggest what type of product this might be based on the barcode format.
+
+default_image_prompt: |
+  Analyze this image and provide any relevant nutritional information.
+  If the image is not food-related, please state that and describe what you see instead.
+
+text_analysis_prompt: |
+  Analyze this food description and provide nutritional information.
+  If specific quantities are not provided, make reasonable estimates based on standard serving sizes.
+
+json_format_instruction: |
+  Provide the response in JSON format with the following structure:
+  {
+    "summary": "A brief overview of the analyzed food item",
+    "nutrition": [
+      {
+        "component": "Name of the nutrient",
+        "value": Numeric value,
+        "unit": "Unit of measurement",
+        "confidence": Confidence level (0.0 to 1.0)
+      },
+      ...
+    ]
+  }

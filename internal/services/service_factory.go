@@ -16,9 +16,9 @@ func NewServiceFactory(config *config.AppConfig) *ServiceFactory {
 func (f *ServiceFactory) GetImageClassifierService() (ImageClassifier, error) {
 	switch f.Config.ImageClassifierService {
 	case "openai":
-		return NewOpenAIService(f.Config.OpenaiKey, f.Config.OpenAIModelForClassification), nil
+		return NewOpenAIService(f.Config.OpenaiKey, f.Config.OpenAIModelForClassification, f.Config), nil
 	case "claude":
-		return NewClaudeService(f.Config.ClaudeKey, f.Config.ClaudeModelForClassification), nil
+		return NewClaudeService(f.Config.ClaudeKey, f.Config.ClaudeModelForClassification, f.Config), nil
 	default:
 		return nil, fmt.Errorf("unknown image classifier service: %s", f.Config.ImageClassifierService)
 	}
@@ -41,9 +41,9 @@ func (f *ServiceFactory) GetAnalyzerService(inputType InputType) (FoodAnalysisSe
 
 	switch serviceType {
 	case "openai":
-		return NewOpenAIService(f.Config.OpenaiKey, f.Config.OpenAIModelForAnalysis), nil
+		return NewOpenAIService(f.Config.OpenaiKey, f.Config.OpenAIModelForAnalysis, f.Config), nil
 	case "claude":
-		return NewClaudeService(f.Config.ClaudeKey, f.Config.ClaudeModelForAnalysis), nil
+		return NewClaudeService(f.Config.ClaudeKey, f.Config.ClaudeModelForAnalysis, f.Config), nil
 	case "mock":
 		return NewMockImageAnalysisService(f.Config.MockServiceType), nil
 	default:

@@ -12,12 +12,14 @@ import (
 type OpenAIService struct {
 	APIKey    string
 	ModelType string
+	Config    *config.AppConfig
 }
 
-func NewOpenAIService(apiKey string, modelType string) *OpenAIService {
+func NewOpenAIService(apiKey string, modelType string, config *config.AppConfig) *OpenAIService {
 	return &OpenAIService{
 		APIKey:    apiKey,
 		ModelType: modelType,
+		Config:    config,
 	}
 }
 
@@ -25,7 +27,7 @@ func (s *OpenAIService) ClassifyImage(file io.Reader) (InputType, error) {
 	encodedImage := utils.EncodeToBase64(file)
 	logging.Log.Info("OpenAI Service: Classifying image, model: " + s.ModelType)
 
-	prompt := config.Config.ClassifyImagePrompt
+	prompt := s.Config.GetPrompt("openai", "classify_image_prompt")
 	payload := s.createPayload(encodedImage, prompt)
 
 	responseData, err := utils.SendHTTPRequest("https://api.openai.com/v1/chat/completions", s.APIKey, payload)
@@ -51,20 +53,20 @@ func (s *OpenAIService) AnalyzeFood(file io.Reader, context string, inputType In
 	encodedImage := utils.EncodeToBase64(file)
 	logging.Log.Info("OpenAI Service: Analyzing food, model: " + s.ModelType)
 
-	var prompt string
+	var promptName string
 	switch inputType {
 	case InputTypeFoodImage:
-		prompt = config.Config.FoodImagePrompt
+		promptName = "food_image_prompt"
 	case InputTypeNutritionLabel:
-		prompt = config.Config.NutritionLabelPrompt
+		promptName = "nutrition_label_prompt"
 	case InputTypeBarcode:
-		prompt = config.Config.BarcodePrompt
+		promptName = "barcode_prompt"
 	default:
-		prompt = config.Config.DefaultImagePrompt
+		promptName = "default_image_prompt"
 	}
-
-	fullContext := fmt.Sprintf("%s\n%s\n%s", prompt, context, "Provide the response in JSON format with 'summary' and 'nutrition' fields.")
-
+	prompt := s.Config.GetPrompt("openai", promptName)
+	jsonFormatInstruction := s.Config.GetPrompt("openai", "json_format_instruction")
+	fullContext := fmt.Sprintf("%s\n%s\n%s", prompt, context, jsonFormatInstruction)
 	payload := s.createPayload(encodedImage, fullContext)
 	responseData, err := utils.SendHTTPRequest("https://api.openai.com/v1/chat/completions", s.APIKey, payload)
 	if err != nil {

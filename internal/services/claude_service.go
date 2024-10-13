@@ -15,12 +15,14 @@ import (
 type ClaudeService struct {
 	APIKey    string
 	ModelType string
+	Config    *config.AppConfig
 }
 
-func NewClaudeService(apiKey string, modelType string) *ClaudeService {
+func NewClaudeService(apiKey string, modelType string, config *config.AppConfig) *ClaudeService {
 	return &ClaudeService{
 		APIKey:    apiKey,
 		ModelType: modelType,
+		Config:    config,
 	}
 }
 
@@ -33,7 +35,7 @@ func (s *ClaudeService) ClassifyImage(file io.Reader) (InputType, error) {
 		return InputTypeUnknown, fmt.Errorf("failed to read image file: %w", err)
 	}
 
-	prompt := config.Config.ClassifyImagePrompt
+	prompt := s.Config.GetPrompt("claude", "classify_image_prompt")
 
 	resp, err := client.CreateMessages(context.Background(), anthropic.MessagesRequest{
 		Model: s.ModelType,
@@ -78,19 +80,20 @@ func (s *ClaudeService) AnalyzeFood(file io.Reader, userContext string, inputTyp
 		return nil, fmt.Errorf("failed to read image file: %w", err)
 	}
 
-	var prompt string
+	var promptString string
 	switch inputType {
 	case InputTypeFoodImage:
-		prompt = config.Config.FoodImagePrompt
+		promptString = "food_image_prompt"
 	case InputTypeNutritionLabel:
-		prompt = config.Config.NutritionLabelPrompt
+		promptString = "nutrition_label_prompt"
 	case InputTypeBarcode:
-		prompt = config.Config.BarcodePrompt
+		promptString = "barcode_prompt"
 	default:
-		prompt = config.Config.DefaultImagePrompt
+		promptString = "default_image_prompt"
 	}
-
-	fullContext := fmt.Sprintf("%s\n%s\n%s", prompt, userContext, "Provide the response in JSON format with 'summary' and 'nutrition' fields.")
+	prompt := s.Config.GetPrompt("claude", promptString)
+	jsonFormatInstruction := s.Config.GetPrompt("claude", "json_format_instruction")
+	fullContext := fmt.Sprintf("%s\n%s\n%s", prompt, userContext, jsonFormatInstruction)
 
 	resp, err := client.CreateMessages(context.Background(), anthropic.MessagesRequest{
 		Model: s.ModelType,
