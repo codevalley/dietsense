@@ -1,6 +1,7 @@
 package services
 
 import (
+	"dietsense/pkg/config"
 	"dietsense/pkg/logging"
 	"dietsense/pkg/utils"
 	"encoding/json"
@@ -24,7 +25,7 @@ func (s *OpenAIService) ClassifyImage(file io.Reader) (InputType, error) {
 	encodedImage := utils.EncodeToBase64(file)
 	logging.Log.Info("OpenAI Service: Classifying image, model: " + s.ModelType)
 
-	prompt := "Classify this image as one of the following: food photo, nutrition label, barcode, or unknown. Respond with just the classification."
+	prompt := config.Config.ClassifyImagePrompt
 	payload := s.createPayload(encodedImage, prompt)
 
 	responseData, err := utils.SendHTTPRequest("https://api.openai.com/v1/chat/completions", s.APIKey, payload)
@@ -53,13 +54,13 @@ func (s *OpenAIService) AnalyzeFood(file io.Reader, context string, inputType In
 	var prompt string
 	switch inputType {
 	case InputTypeFoodImage:
-		prompt = "Analyze this food image and provide nutritional information."
+		prompt = config.Config.FoodImagePrompt
 	case InputTypeNutritionLabel:
-		prompt = "Extract and summarize the nutritional information from this nutrition label."
+		prompt = config.Config.NutritionLabelPrompt
 	case InputTypeBarcode:
-		prompt = "This is a barcode. If you can read it, provide the encoded information and any related nutritional data if available."
+		prompt = config.Config.BarcodePrompt
 	default:
-		prompt = "Analyze this image and provide any relevant nutritional information."
+		prompt = config.Config.DefaultImagePrompt
 	}
 
 	fullContext := fmt.Sprintf("%s\n%s\n%s", prompt, context, "Provide the response in JSON format with 'summary' and 'nutrition' fields.")

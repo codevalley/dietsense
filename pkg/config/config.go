@@ -20,7 +20,7 @@ type AppConfig struct {
 	ContextString string   `mapstructure:"context_string"`
 	ModelType     string   `mapstructure:"model_type"` // "fast", "normal", or "accurate"
 
-	// New fields for service configuration
+	// fields for service configuration
 	ImageClassifierService       string `mapstructure:"image_classifier_service"`
 	OpenAIModelForClassification string `mapstructure:"openai_model_for_classification"`
 	ClaudeModelForClassification string `mapstructure:"claude_model_for_classification"`
@@ -34,7 +34,16 @@ type AppConfig struct {
 	OpenAIModelForAnalysis string `mapstructure:"openai_model_for_analysis"`
 	ClaudeModelForAnalysis string `mapstructure:"claude_model_for_analysis"`
 
-	// New field for mock service configuration
+	// prompts for image analysis
+	ClassifyImagePrompt   string `mapstructure:"classify_image_prompt"`
+	FoodImagePrompt       string `mapstructure:"food_image_prompt"`
+	NutritionLabelPrompt  string `mapstructure:"nutrition_label_prompt"`
+	BarcodePrompt         string `mapstructure:"barcode_prompt"`
+	DefaultImagePrompt    string `mapstructure:"default_image_prompt"`
+	TextAnalysisPrompt    string `mapstructure:"text_analysis_prompt"`
+	JSONFormatInstruction string `mapstructure:"json_format_instruction"`
+
+	// field for mock service configuration
 	MockServiceType string `mapstructure:"mock_service_type"`
 }
 
@@ -67,6 +76,15 @@ func Setup() {
 	viper.SetDefault("default_analyzer_service", "openai")
 	viper.SetDefault("openai_model_for_analysis", "gpt-4-vision-preview")
 	viper.SetDefault("claude_model_for_analysis", "claude-3-opus-20240229")
+
+	// Set defaults for new prompt fields
+	viper.SetDefault("classify_image_prompt", "Classify this image as one of the following: food photo, nutrition label, barcode, or unknown. Respond with just the classification.")
+	viper.SetDefault("food_image_prompt", "Analyze this food image and provide nutritional information.")
+	viper.SetDefault("nutrition_label_prompt", "Extract and summarize the nutritional information from this nutrition label.")
+	viper.SetDefault("barcode_prompt", "This is a barcode. If you can read it, provide the encoded information and any related nutritional data if available.")
+	viper.SetDefault("default_image_prompt", "Analyze this image and provide any relevant nutritional information.")
+	viper.SetDefault("text_analysis_prompt", "Analyze this food description and provide nutritional information.")
+	viper.SetDefault("json_format_instruction", "Provide the response in JSON format with 'summary' and 'nutrition' fields.")
 
 	// Set default for mock service type
 	viper.SetDefault("mock_service_type", "default")
